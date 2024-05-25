@@ -32,10 +32,14 @@ class Course {
     }
 
     registerCourse(name, score, unit, semester) {
-        this.name = name;
-        this.setScore(score);
-        this.setUnit(unit);
-        this.semester = semester;
+        if (unit < 0 || unit > 5 || 0 < score > 100 ) return false;
+        return this._addCourse(name, score, unit, semester)
+    }
+    
+    _addCourse(name, score, unit, semester) {
+        let course = new Course(name, score, unit, semester);
+        this.courses[name] = course;
+        return true
     }
 
     getResult() {
@@ -49,20 +53,30 @@ class Course {
 }
 
 class CGPACalculator {
-    constructor(courses = []) {
-        this._courses = courses;
+    constructor(courses) {
+        this._courses = [];
         this._firstGPA = 0.0;
         this._secondGPA = 0.0;
         this._cumulativeGPA = 0.0;
     }
 
-    addCourse(course) {
-        this._courses.push(course);
+    registerCourse(course) {
+        if (course.unit < 0 || course.unit > 5 || 0 < course.score > 100 ) return false;
+        return this._addCourse(course)
     }
-   
-    registerCourse(name, score, unit, semester) {
-        const newCourse = new Course (name, score, semester);
-        this.addCourse(newCourse);
+    
+    _addCourse(course) {
+        
+        for (const currCourse of this._courses){
+            if (course.name === currCourse.name && course.semester === currCourse.semester) {
+                console.log("Already existing course in this semester");
+                return false
+            }
+        }
+        
+        this._courses.push(course);
+        console.log("Successfully add your course");
+        return true
     }
    
     calculateSemesterGPA(semester) {
@@ -89,12 +103,14 @@ class CGPACalculator {
     calculateCGPA() {
         let totalUnits = 0;
         let totalPoints = 0;
+        const ZERO_CGPA_VALUE = 0.0;
+        
         for (const course of this._courses) {
             totalUnits += course.getUnit();
             totalPoints += course.getUnit() * course.getResult();
         }
         if (totalUnits === 0) {
-            return 0.0
+            return ZERO_CGPA_VALUE
         }
         this._cumulativeGPA = totalPoints / totalUnits;
         return this._cumulativeGPA;
@@ -117,16 +133,17 @@ class CGPACalculator {
     }
 }
 
-const biology = new Course("Biology", 80, 1, "second");
-const chemistry = new Course("Chemistry", 60, 3, "first");
+const bio = new Course("Biology", 80, 1, "second");
+const chm = new Course("Chemistry", 60, 3, "first");
 const math = new Course("Math", 70, 2, "first");
 
 
 
-const cgpaCalculator = new CGPACalculator();
-cgpaCalculator.addCourse(biology, 80, 1, "second");
-cgpaCalculator.addCourse(chemistry, 60, 3, "first");
-cgpaCalculator.addCourse(math, 70, 2, "first");
+let cgpaCalculator = new CGPACalculator();
+cgpaCalculator.registerCourse(bio);
+cgpaCalculator.registerCourse(chm);
+cgpaCalculator.registerCourse(math);
+cgpaCalculator.registerCourse(math);
 
 
 
